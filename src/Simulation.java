@@ -23,7 +23,7 @@ public class Simulation{
 	}
 
 
-	public static void multi_QueueRandomQueueSimulation(){
+	public static void multi_RandomQueueSimulation(){
 
 	}
 }

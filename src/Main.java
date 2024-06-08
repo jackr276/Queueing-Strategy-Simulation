@@ -23,5 +23,25 @@ public class Main{
 		//Grab user selection
 		int option = in.nextInt();
 		in.close();
+
+
+
+		switch(option){
+			case 1:
+				Simulation.single_QueueSimulation();
+				break;
+			case 2:
+				Simulation.multi_RoundRobinSimulation();
+				break;
+			case 3:
+				Simulation.multi_ShortestQueueSimulation();
+				break;
+			case 4:
+				Simulation.multi_RandomQueueSimulation();
+				break;
+			default:
+				System.out.println("Invalid entry, program will now terminate");
+				return;
+		}
 	}	
 }
