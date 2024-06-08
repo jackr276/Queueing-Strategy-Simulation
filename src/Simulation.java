@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Simulation{
 
-	private static ServiceStation[] stations;
 	private static final long startTime = System.currentTimeMillis();
 
 
@@ -23,59 +22,77 @@ public class Simulation{
 	 * A simulation in which all passengers are taken from a single queue when ready
 	 */
 	public static void single_QueueSimulation(int duration, int averageArrivalTime, int averageServiceTime){
-		BlockingQueue<Passenger> passengers = new LinkedBlockingQueue<>(duration / averageArrivalTime);
+		int numPassengers = duration / averageArrivalTime;
+		BlockingQueue<Passenger> line = new LinkedBlockingQueue<>(numPassengers);
 		//5 service stations
 		ScheduledExecutorService servicePool = Executors.newScheduledThreadPool(5);
 		//1 queue for passengers
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
 
+		int delaySeconds;
 		//Immediately begin dequeueing from the pool
 		for(int i = 0; i < duration / averageArrivalTime; i++){
-			int delaySeconds = i * averageServiceTime;
-			servicePool.schedule(dequeue(passengers), delaySeconds, TimeUnit.SECONDS);	
+			if(i < 5){
+				delaySeconds = 0;
+			} else {
+				delaySeconds = i * averageServiceTime;
+			}
+			servicePool.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
 		}
-	
+			
+		Passenger[] passengers = new Passenger[numPassengers];
 
-		stations = new ServiceStation[5];
+		for(int i = 0; i < numPassengers; i++){
+			delaySeconds = averageArrivalTime * 2 + i * averageArrivalTime;
+			passengers[i] = new Passenger();
+			Passenger entrant = passengers[i];
+			passengerPool.schedule(() -> enqueue(line, entrant), delaySeconds, TimeUnit.SECONDS);
+		}
 
-		
+		servicePool.shutdown();
+		passengerPool.shutdown();
+
+		int sumWaitingTime = 0;
+		for(int i = 0; i < numPassengers; i++){
+			sumWaitingTime += passengers[i].getWaitingTime();
+		}
+
+
+		System.out.println("Average waiting time: " + (double)sumWaitingTime / numPassengers );
 	}
 
 	
 	public static void multi_RoundRobinSimulation(int duration, int averageArrivalTime, int averageServiceTime){
-		stations = new ServiceStation[5];
 	}
 
 
 	public static void multi_ShortestQueueSimulation(int duration, int averageArrivalTime, int averageServiceTime){
-		stations = new ServiceStation[5];
 	}
 
 
 	public static void multi_RandomQueueSimulation(int duration, int averageArrivalTime, int averageServiceTime){
-		stations = new ServiceStation[5];
 	}
 
 
 	private static void enqueue(BlockingQueue<Passenger> queue, Passenger p){
+		System.out.println("Enqueueing");
 		try{
 			queue.put(p);
 			p.startWaiting();
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
-
-
+		System.out.println(Thread.currentThread().getName());
 	}	
 
 	private static void dequeue(BlockingQueue<Passenger> queue){
+		System.out.println("Dequeueing");
 		try{
 			Passenger dequeued = queue.take();
 			dequeued.stopWaiting();
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
-
+		System.out.println(Thread.currentThread().getName());
 	}
-
 }
