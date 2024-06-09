@@ -26,6 +26,6 @@ public class Passenger{
 	}
 	
 	public long getWaitingTime(){
-		return (this.waitingStartTime - this.waitingEndTime) / 1000;
+		return (this.waitingEndTime - this.waitingStartTime) / 1000;
 	}
 }

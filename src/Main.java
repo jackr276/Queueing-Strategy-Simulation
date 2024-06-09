@@ -43,7 +43,6 @@ public class Main{
 		//Done scanning
 		in.close();
 		
-
 		//Switch on user input, call appropriate simulation
 		switch(option){
 			case 1:
