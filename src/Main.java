@@ -29,15 +29,15 @@ public class Main{
 		int option = in.nextInt();
 
 		//Get the simulation duration in seconds
-		System.out.print("\nEnter the simulation duration in minutes: ");
+		System.out.print("Enter the simulation duration in minutes: ");
 		int simulationDuration = in.nextInt() * 60;
 
 		//Get the average arrival time of passengers
-		System.out.print("\nEnter the average arrival time in seconds: ");
+		System.out.print("Enter the average arrival time in seconds: ");
 		int averageArrivalTime = in.nextInt();
 
 		//Get the average service time of the service stations
-		System.out.print("\nEnter the average service time in seconds: ");
+		System.out.print("Enter the average service time in seconds: ");
 		int averageServiceTime = in.nextInt();
 
 		//Done scanning

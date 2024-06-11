@@ -21,11 +21,14 @@ public class Simulation{
 	 */
 	public static void single_QueueSimulation(int duration, int averageArrivalTime, int averageServiceTime){
 		long startTime = System.currentTimeMillis();
+
+		//Num passengers will be the duration divided by average arrival
 		int numPassengers = duration / averageArrivalTime;
 		Random random = new Random(System.currentTimeMillis());
 
-
+		//Single blocking queue for all of our passengers
 		BlockingQueue<Passenger> line = new LinkedBlockingQueue<>(numPassengers);
+
 		//5 service stations
 		ScheduledExecutorService service1 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service2 = Executors.newScheduledThreadPool(1);
@@ -46,6 +49,7 @@ public class Simulation{
 				//Otherwise, 
 				delaySeconds = i * averageServiceTime + random.nextInt(-2, 2);
 			}
+			//Schedule the dequeue for each service station
 			service1.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
 			service2.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
 			service3.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
@@ -57,33 +61,38 @@ public class Simulation{
 		Passenger[] passengers = new Passenger[numPassengers];
 
 		for(int i = 0; i < numPassengers; i++){
-			//+/- withing 5 seconds randomly for arrival
+			//+/- 2 seconds randomly for arrival
 			delaySeconds = i * averageArrivalTime + random.nextInt(-2, 2);
 			passengers[i] = new Passenger();
+			//Local copy to avoid compile error
 			Passenger entrant = passengers[i];
+			//Schedule passenger pool entrance
 			passengerPool.schedule(() -> enqueue(line, entrant), delaySeconds, TimeUnit.SECONDS);
 		}
 
-		//Shutdown once done
+		//Shutdown
 		service1.shutdown();
 		service2.shutdown();
 		service3.shutdown();
 		service4.shutdown();
 		service5.shutdown();
 		passengerPool.shutdown();
-		
+	
+		//Blocking while loop for service station termination
 		while(!service1.isTerminated() ||
 				!service2.isTerminated() || 
 				!service3.isTerminated() || 
 				!service4.isTerminated() ||
 				!service5.isTerminated());
 
+
+		//Calculate the average waiting time
 		double waitingSum = 0;
 		for(int i = 0; i < passengers.length; i++){
 			waitingSum += passengers[i].getWaitingTime();	
 		}
 
-
+		//Display program statistics for user
 		System.out.println("\n\n=================== Program Statistics ======================");
 		System.out.println("Program Runtime: " + (System.currentTimeMillis() - startTime) / 1000 + " seconds.");
 		System.out.printf("Average waiting time: %.2f seconds", (waitingSum / passengers.length));
@@ -104,20 +113,29 @@ public class Simulation{
 	}
 
 
+	/**
+	 * Helper method for enqueueing a passenger into a blocking queue
+	 */
 	private static void enqueue(BlockingQueue<Passenger> queue, Passenger p){
 		try{
+			//Put in the queue
 			queue.put(p);
-			System.out.println("Enqueueing");
+			//Set the waiting flag for calculation
 			p.startWaiting();
+			System.out.println("Enqueueing");
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
 		System.out.println("Line size: " + queue.size() + " passengers");
 	}	
 
+
+
 	private static void dequeue(BlockingQueue<Passenger> queue){
 		try{
+			//Dequeue from the queueu
 			Passenger dequeued = queue.take();
+			//Stop the waiting
 			System.out.println("Dequeueing");
 			dequeued.stopWaiting();
 		} catch(InterruptedException ie){
