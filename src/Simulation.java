@@ -10,9 +10,12 @@ import java.util.concurrent.TimeUnit;
  * CS 610 Programming Assignment 1
  *
  * This class contains the simulation of queueing strategies
+ * Strategies included are 
+ * 	- Single queue with 5 service stations
+ * 	- Multiple queues with a round robin dispatch
+ * 	- Multiple queues with a shortest queue dispatch
+ * 	- Multiple queues with a random queue dispatch
  */
-
-
 
 public class Simulation{
 	
