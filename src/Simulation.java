@@ -78,13 +78,14 @@ public class Simulation{
 		passengerPool.shutdown();
 	
 		//Blocking while loop for service station termination
-		while(!service1.isTerminated() ||
+		while(  !service1.isTerminated() ||
 				!service2.isTerminated() || 
 				!service3.isTerminated() || 
 				!service4.isTerminated() ||
 				!service5.isTerminated() ||
 				!passengerPool.isTerminated());
 
+		//Print runtime statistics to the console
 		printRuntimeStatistics(passengers, numPassengers, startTime);
 	}
 
@@ -139,7 +140,7 @@ public class Simulation{
 			passengers[i] = new Passenger();
 			Passenger entrant = passengers[i];
 
-
+			//Round robin dispatch strategy
 			switch(i % 5){
 				case 1:
 					passengerPool.schedule(() -> enqueue(service1_line, entrant), delaySeconds, TimeUnit.SECONDS);
@@ -160,11 +161,27 @@ public class Simulation{
 				case 0:
 					passengerPool.schedule(() -> enqueue(service5_line, entrant), delaySeconds, TimeUnit.SECONDS);
 					break;
-				
 			}
 		}
 
+		//Shutdown
+		service1.shutdown();
+		service2.shutdown();
+		service3.shutdown();
+		service4.shutdown();
+		service5.shutdown();
+		passengerPool.shutdown();
+	
+		//Blocking while loop for service station termination
+		while(  !service1.isTerminated() ||
+				!service2.isTerminated() || 
+				!service3.isTerminated() || 
+				!service4.isTerminated() ||
+				!service5.isTerminated() ||
+				!passengerPool.isTerminated());
 
+		//Print runtime statistics to the console
+		printRuntimeStatistics(passengers, numPassengers, startTime);	
 	}
 
 
@@ -199,14 +216,18 @@ public class Simulation{
 			//Dequeue from the queueu
 			Passenger dequeued = queue.take();
 			//Stop the waiting
-			System.out.println("Dequeueing");
 			dequeued.stopWaiting();
+			System.out.println("Dequeueing");
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
 		System.out.println(Thread.currentThread().getName());
 	}
 
+
+	/**
+	 * A private helper method for printing the runtime statistics to the command line
+	 */
 	private static void printRuntimeStatistics(Passenger[] passengers, int numPassengers, long startTime){	
 		//Calculate the average waiting time
 		double waitingSum = 0;
