@@ -43,7 +43,7 @@ public class Simulation{
 		ScheduledExecutorService service4 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service5 = Executors.newScheduledThreadPool(1);
 
-		//1 queue for passengers to enter from
+		//Dispatch thread
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
 
 		int delaySeconds = 0;
