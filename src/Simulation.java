@@ -1,10 +1,3 @@
-import java.util.Random;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Author: Jack Robbins
  * CS 610 Programming Assignment 1
@@ -17,8 +10,16 @@ import java.util.concurrent.TimeUnit;
  * 	- Multiple queues with a random queue dispatch
  */
 
+import java.util.Random;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+
 public class Simulation{
-	
+	//Shortest and longest queue tracking -- may change	
 	private static int shortestQueueLength = 100;
 	private static int longestQueueLength = 0;
 
@@ -122,10 +123,10 @@ public class Simulation{
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
 
 		int delaySeconds = 0;
-		//Immediately begin dequeueing from the pool
+		//Immediately begin dequeueing from the pool, as our stations are already ready to serve
 		for(int i = 0; i < numPassengers / 5; i++){
 			//When the pool is empty, each service station is ready to dequeue
-			if(i < 1){
+			if(i > 0){
 				//Set a delay with some randomness here -- this acts as the "service time"
 				delaySeconds = i * averageServiceTime + random.nextInt(-2, 2);
 			}
@@ -143,7 +144,9 @@ public class Simulation{
 
 		//Schedule all of the passengers
 		for(int i = 0; i < numPassengers; i++){
+			//Calculate the arrival time with a random element
 			delaySeconds = i * averageArrivalTime + random.nextInt(-2, 2);
+			//Make our new passenger
 			passengers[i] = new Passenger();
 			Passenger entrant = passengers[i];
 
@@ -225,7 +228,7 @@ public class Simulation{
 		//Immediately begin dequeueing from the pool
 		for(int i = 0; i < numPassengers / 5; i++){
 			//When the pool is empty, each service station is ready to dequeue
-			if(i < 1){
+			if(i > 0){
 				//Set a delay with some randomness here -- this acts as the "service time"
 				delaySeconds = i * averageServiceTime + random.nextInt(-2, 2);
 			}
@@ -243,6 +246,7 @@ public class Simulation{
 
 		//Schedule all of the passengers
 		for(int i = 0; i < numPassengers; i++){
+			//Calculate the arrival time with a random element
 			delaySeconds = i * averageArrivalTime + random.nextInt(-2, 2);
 			passengers[i] = new Passenger();
 			Passenger entrant = passengers[i];
@@ -297,14 +301,13 @@ public class Simulation{
 	 */
 	private static void enqueue(BlockingQueue<Passenger> queue, Passenger p){
 		try{
-			//Put in the queue
 			queue.put(p);
 			//Set the waiting flag for calculation
 			p.startWaiting();
 			System.out.println("Enqueueing");
 
+			//Maintain the shortest and longest length for the queue
 			if(queue.size() < shortestQueueLength){
-				shortestQueueLength = queue.size();
 			} else if(queue.size() > longestQueueLength){
 				longestQueueLength = queue.size();
 			}
@@ -312,14 +315,17 @@ public class Simulation{
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
+
 		System.out.println("Line size: " + queue.size() + " passengers");
 	}	
 
 
 
+	/**
+	 * Helper method for dequeueing passenger into a blocking queue
+	 */
 	private static void dequeue(BlockingQueue<Passenger> queue){
 		try{
-			//Dequeue from the queueu
 			Passenger dequeued = queue.take();
 			//Stop the waiting
 			dequeued.stopWaiting();

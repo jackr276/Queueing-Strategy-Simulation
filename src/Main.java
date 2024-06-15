@@ -23,6 +23,7 @@ public class Main{
 		System.out.println("2. Multiple queues with Round Robin dispatch strategy");
 		System.out.println("3. Multiple queues with shortest queue dispatch strategy");
 		System.out.println("4. Multiple queues with random queue dispatch strategy");
+		System.out.println("\n============================================================");	
 		System.out.print("\nWhich simulation would you like to run: ");
 
 		//Grab user selection
