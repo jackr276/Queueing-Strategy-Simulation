@@ -94,7 +94,7 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(passengers, numPassengers, startTime);
+		printRuntimeStatistics(passengers, numPassengers, startTime, false);
 	}
 
 	
@@ -191,7 +191,7 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(passengers, numPassengers, startTime);	
+		printRuntimeStatistics(passengers, numPassengers, startTime, true);	
 	}
 
 
@@ -205,6 +205,7 @@ public class Simulation{
 
 		//Num passengers will be the duration divided by average arrival
 		int numPassengers = duration / averageArrivalTime;
+		//For our random queue enqueueing
 		Random random = new Random(System.currentTimeMillis());
 
 		//5 service lines for this simulation -- one per service station
@@ -292,7 +293,7 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(passengers, numPassengers, startTime);	
+		printRuntimeStatistics(passengers, numPassengers, startTime, true);	
 	}
 
 
@@ -304,7 +305,6 @@ public class Simulation{
 			queue.put(p);
 			//Set the waiting flag for calculation
 			p.startWaiting();
-			System.out.println("Enqueueing");
 
 			//Maintain the shortest and longest length for the queue
 			if(queue.size() < shortestQueueLength){
@@ -315,8 +315,6 @@ public class Simulation{
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
-
-		System.out.println("Line size: " + queue.size() + " passengers");
 	}	
 
 
@@ -329,18 +327,16 @@ public class Simulation{
 			Passenger dequeued = queue.take();
 			//Stop the waiting
 			dequeued.stopWaiting();
-			System.out.println("Dequeueing");
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
-		System.out.println(Thread.currentThread().getName());
 	}
 
 
 	/**
 	 * A private helper method for printing the runtime statistics to the command line
 	 */
-	private static void printRuntimeStatistics(Passenger[] passengers, int numPassengers, long startTime){	
+	private static void printRuntimeStatistics(Passenger[] passengers, int numPassengers, long startTime, boolean is_multi){	
 		//Calculate the average waiting time
 		double waitingSum = 0;
 		for(int i = 0; i < passengers.length; i++){
@@ -349,8 +345,15 @@ public class Simulation{
 
 		//Display program statistics for user
 		System.out.println("\n\n=================== Program Statistics ======================");
-		System.out.println("Program Runtime: " + (System.currentTimeMillis() - startTime) / 1000 + " seconds.");
+		System.out.println("Program Runtime: " + (System.currentTimeMillis() - startTime) / 1000 + " seconds");
 		System.out.printf("Average waiting time: %.2f seconds", (waitingSum / passengers.length));
+
+		if(is_multi){
+
+		} else {
+
+		}
+
 		System.out.println("\n\n=============================================================");	
 	}
 }
