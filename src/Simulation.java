@@ -43,6 +43,14 @@ public class Simulation{
 		ScheduledExecutorService service3 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service4 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service5 = Executors.newScheduledThreadPool(1);
+		
+		ServiceStation station1 = new ServiceStation();	
+		ServiceStation station2 = new ServiceStation();
+		ServiceStation station3 = new ServiceStation();
+		ServiceStation station4 = new ServiceStation();
+		ServiceStation station5 = new ServiceStation();
+			
+		ServiceStation[] stations = {station1,station2, station3, station4, station5};
 
 		//Dispatch thread
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
@@ -55,13 +63,15 @@ public class Simulation{
 				//Otherwise, set the appropriate delay. This acts as the "service time"  
 				delaySeconds = i * averageServiceTime + random.nextInt(-2, 2);
 			}
+				
+			final int processingTime = (delaySeconds == 0) ? averageServiceTime : delaySeconds;
 
 			//Schedule the dequeue for each service station
-			service1.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
-			service2.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
-			service3.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
-			service4.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
-			service5.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
+			service1.schedule(() -> dequeue(line, processingTime, station1), delaySeconds, TimeUnit.SECONDS);	
+			service2.schedule(() -> dequeue(line, processingTime, station2), delaySeconds, TimeUnit.SECONDS);	
+			service3.schedule(() -> dequeue(line, processingTime, station3), delaySeconds, TimeUnit.SECONDS);	
+			service4.schedule(() -> dequeue(line, processingTime, station4), delaySeconds, TimeUnit.SECONDS);	
+			service5.schedule(() -> dequeue(line, processingTime, station5), delaySeconds, TimeUnit.SECONDS);	
 		}
 
 		//Keep an array of passengers for timing
@@ -94,7 +104,7 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(passengers, numPassengers, startTime, false);
+		printRuntimeStatistics(passengers, numPassengers, stations, startTime, false);
 	}
 
 	
@@ -118,6 +128,15 @@ public class Simulation{
 		ScheduledExecutorService service3 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service4 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service5 = Executors.newScheduledThreadPool(1);
+	
+		ServiceStation station1 = new ServiceStation();	
+		ServiceStation station2 = new ServiceStation();
+		ServiceStation station3 = new ServiceStation();
+		ServiceStation station4 = new ServiceStation();
+		ServiceStation station5 = new ServiceStation();
+			
+		ServiceStation[] stations = {station1,station2, station3, station4, station5};
+
 
 		//1 queue for passengers to enter from
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
@@ -131,14 +150,17 @@ public class Simulation{
 				delaySeconds = i * averageServiceTime + random.nextInt(-2, 2);
 			}
 
-			//Schedule the dequeue for each service station
-			service1.schedule(() -> dequeue(service1_line), delaySeconds, TimeUnit.SECONDS);	
-			service2.schedule(() -> dequeue(service2_line), delaySeconds, TimeUnit.SECONDS);	
-			service3.schedule(() -> dequeue(service3_line), delaySeconds, TimeUnit.SECONDS);	
-			service4.schedule(() -> dequeue(service4_line), delaySeconds, TimeUnit.SECONDS);	
-			service5.schedule(() -> dequeue(service5_line), delaySeconds, TimeUnit.SECONDS);	
 		}
 
+		final int processingTime = (delaySeconds == 0) ? averageServiceTime : delaySeconds;
+
+		//Schedule the dequeue for each service station
+		service1.schedule(() -> dequeue(service1_line, processingTime, station1), delaySeconds, TimeUnit.SECONDS);	
+		service2.schedule(() -> dequeue(service2_line, processingTime, station2), delaySeconds, TimeUnit.SECONDS);	
+		service3.schedule(() -> dequeue(service3_line, processingTime, station3), delaySeconds, TimeUnit.SECONDS);	
+		service4.schedule(() -> dequeue(service4_line, processingTime, station4), delaySeconds, TimeUnit.SECONDS);	
+		service5.schedule(() -> dequeue(service5_line, processingTime, station5), delaySeconds, TimeUnit.SECONDS);	
+		
 		//Keep an array of passengers for timing
 		Passenger[] passengers = new Passenger[numPassengers];
 
@@ -191,7 +213,7 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(passengers, numPassengers, startTime, true);	
+		printRuntimeStatistics(passengers, numPassengers, stations, startTime, true);	
 	}
 
 
@@ -222,6 +244,14 @@ public class Simulation{
 		ScheduledExecutorService service4 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service5 = Executors.newScheduledThreadPool(1);
 
+		ServiceStation station1 = new ServiceStation();	
+		ServiceStation station2 = new ServiceStation();
+		ServiceStation station3 = new ServiceStation();
+		ServiceStation station4 = new ServiceStation();
+		ServiceStation station5 = new ServiceStation();
+			
+		ServiceStation[] stations = {station1,station2, station3, station4, station5};
+
 		//1 queue for passengers to enter from
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
 
@@ -234,14 +264,17 @@ public class Simulation{
 				delaySeconds = i * averageServiceTime + random.nextInt(-2, 2);
 			}
 
-			//Schedule the dequeue for each service station
-			service1.schedule(() -> dequeue(service1_line), delaySeconds, TimeUnit.SECONDS);	
-			service2.schedule(() -> dequeue(service2_line), delaySeconds, TimeUnit.SECONDS);	
-			service3.schedule(() -> dequeue(service3_line), delaySeconds, TimeUnit.SECONDS);	
-			service4.schedule(() -> dequeue(service4_line), delaySeconds, TimeUnit.SECONDS);	
-			service5.schedule(() -> dequeue(service5_line), delaySeconds, TimeUnit.SECONDS);	
 		}
 
+		final int processingTime = (delaySeconds == 0) ? averageServiceTime : delaySeconds;
+
+		//Schedule the dequeue for each service station
+		service1.schedule(() -> dequeue(service1_line, processingTime, station1), delaySeconds, TimeUnit.SECONDS);	
+		service2.schedule(() -> dequeue(service2_line, processingTime, station2), delaySeconds, TimeUnit.SECONDS);	
+		service3.schedule(() -> dequeue(service3_line, processingTime, station3), delaySeconds, TimeUnit.SECONDS);	
+		service4.schedule(() -> dequeue(service4_line, processingTime, station4), delaySeconds, TimeUnit.SECONDS);	
+		service5.schedule(() -> dequeue(service5_line, processingTime, station5), delaySeconds, TimeUnit.SECONDS);	
+	
 		//Keep an array of passengers for timing
 		Passenger[] passengers = new Passenger[numPassengers];
 
@@ -293,7 +326,7 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(passengers, numPassengers, startTime, true);	
+		printRuntimeStatistics(passengers, numPassengers, stations, startTime, true);	
 	}
 
 
@@ -322,9 +355,11 @@ public class Simulation{
 	/**
 	 * Helper method for dequeueing passenger into a blocking queue
 	 */
-	private static void dequeue(BlockingQueue<Passenger> queue){
+	private static void dequeue(BlockingQueue<Passenger> queue, int delaySeconds, ServiceStation station){
 		try{
+			//Occupy the service station for a certain number of seconds
 			Passenger dequeued = queue.take();
+			station.occupy(delaySeconds);
 			//Stop the waiting
 			dequeued.stopWaiting();
 		} catch(InterruptedException ie){
@@ -336,17 +371,25 @@ public class Simulation{
 	/**
 	 * A private helper method for printing the runtime statistics to the command line
 	 */
-	private static void printRuntimeStatistics(Passenger[] passengers, int numPassengers, long startTime, boolean is_multi){	
+	private static void printRuntimeStatistics(Passenger[] passengers, int numPassengers, ServiceStation[] stations, long startTime, boolean is_multi){	
 		//Calculate the average waiting time
 		double waitingSum = 0;
 		for(int i = 0; i < passengers.length; i++){
 			waitingSum += passengers[i].getWaitingTime();	
 		}
 
+		long simulationDuration = (System.currentTimeMillis() - startTime) / 1000;
+
 		//Display program statistics for user
 		System.out.println("\n\n=================== Program Statistics ======================");
-		System.out.println("Program Runtime: " + (System.currentTimeMillis() - startTime) / 1000 + " seconds");
+		System.out.println("Program Runtime: " + simulationDuration + " seconds");
 		System.out.printf("Average waiting time: %.2f seconds", (waitingSum / passengers.length));
+		System.out.println("\nService Time Waiting Percentages");	
+		//Print out the percentage of active time per station
+		for(int i = 0; i < 5; i++){
+			System.out.printf("Station %d: active %d%% of the time\n", i + 1, (stations[i].getTimeOccupied() / simulationDuration) * 100);
+		}
+
 
 		if(is_multi){
 
