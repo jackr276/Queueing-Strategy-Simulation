@@ -436,7 +436,7 @@ public class Simulation{
 			//Update queue lengths in context
 			context.setLongestQueueLength(queueID);	
 
-			System.out.println("Enqueueing into queue: " + queueID);
+			System.out.println("Enqueueing into queue: " + (queueID+1));
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
@@ -457,15 +457,17 @@ public class Simulation{
 			if(dequeued != null){
 				//There should be no wait if we're the first 5 customers	
 				if(context.getPassengersServed() > 4){
-				//Occupy the service station for a certain number of seconds
-					TimeUnit.SECONDS.sleep(context.getAverageServiceTime() + random.nextInt(-2, 2));
+					//Occupy the service station for a certain number of seconds
+					int randomFactor = random.nextInt(-2, 2);	
+					TimeUnit.SECONDS.sleep(context.getAverageServiceTime() + randomFactor);
+					context.addToRandomFactor(randomFactor);
 				}
 
 				//Set the waiting flag
 				dequeued.stopWaiting(stationID);
 				//Keep track of the passengers served
 				context.passengerServed();
-				System.out.println("Station " + stationID + " dequeueing from queue: " + queueID);
+				System.out.println("Station " + (stationID + 1) + " dequeueing from queue: " + (queueID + 1));
 			}
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
@@ -492,14 +494,14 @@ public class Simulation{
 		//Calcualte the number of passengers per queue
 		int[] passengersByQueue = new int[5];
 		for(Passenger passenger : context.getPassengers()){
-			if(passenger.getProcessedBy() == -1) continue;
 			passengersByQueue[passenger.getProcessedBy()]++;
 		}
 
 		System.out.println("\nService Time Waiting Percentages");
 		//Print out the percentage of active time per station
 		for(int i = 0; i < 5; i++){
-			double stationActivePercent = ((double)passengersByQueue[i] * context.getAverageServiceTime() / simulationDuration) * 100;
+			double stationActivePercent = ((((double)passengersByQueue[i] * context.getAverageServiceTime())
+											+ context.getRandomFactor()) / simulationDuration) * 100;
 			System.out.printf("\tStation %d: active %.2f%% of the time\n", i + 1, stationActivePercent);
 		}
 

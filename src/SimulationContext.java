@@ -20,6 +20,7 @@ public class SimulationContext{
 	private int numPassengers;
 	private Passenger[] passengers;
 	private int passengersServed;
+	private int randomFactor;
 
 	public SimulationContext(){
 		this.shortestQueueLength = 100;
@@ -27,10 +28,15 @@ public class SimulationContext{
 		this.queues = new ArrayList<>();
 		this.lengths = new HashMap<>();
 		this.passengersServed = 0;
+		this.randomFactor = 0;
 	}	
 
 	public void setStartTime(long startTime){
 		this.startTime = startTime;
+	}
+
+	public void addToRandomFactor(int randomAdjustment){
+		this.randomFactor += randomAdjustment;
 	}
 
 	public void setAverageServiceTime(int averageServiceTime){
@@ -92,6 +98,9 @@ public class SimulationContext{
 		return this.passengersServed;
 	}
 
+	public int getRandomFactor(){
+		return this.randomFactor;
+	}
 
 	/**
 	 * A simple helper method to get the length of the shortest queue
