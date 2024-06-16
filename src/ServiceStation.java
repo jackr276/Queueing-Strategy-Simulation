@@ -8,18 +8,20 @@
 
 
 public class ServiceStation{
-	private int timeOccupied;
+	private int averageServiceTime;
+	private int passengersServed;
 
-	public ServiceStation(){
-		this.timeOccupied = 0;
+	public ServiceStation(int averageServiceTime){
+		this.averageServiceTime = averageServiceTime;
+		this.passengersServed = 0;
 	}
 
-	public void occupy(int delaySeconds){
-		this.timeOccupied += delaySeconds;
-	}			
+	public void servePassenger(){
+		this.passengersServed++;
+	}	
 
-	public int getTimeOccupied(){
-		return this.timeOccupied;
+	public double getTimeOccupied(){
+		return this.passengersServed * this.averageServiceTime;
 	}
 
 }

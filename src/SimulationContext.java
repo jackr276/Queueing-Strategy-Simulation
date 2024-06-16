@@ -5,13 +5,14 @@ import java.util.concurrent.BlockingQueue;
 public class SimulationContext{
 	private int longestQueueLength;
 	private int shortestQueueLength;
+	private int averageServiceTime;
 	private ArrayList<BlockingQueue<Passenger>> queues;
 	private ArrayList<ServiceStation> stations;
 	private HashMap<BlockingQueue<Passenger>, Integer> lengths;
 	private long startTime;
 	private int numPassengers;
 	private Passenger[] passengers;
-
+	private int passengersServed;
 
 	public SimulationContext(){
 		this.longestQueueLength = 0;
@@ -19,10 +20,15 @@ public class SimulationContext{
 		this.queues = new ArrayList<>();
 		this.stations = new ArrayList<>();
 		this.lengths = new HashMap<>();
+		this.passengersServed = 0;
 	}	
 
 	public void setStartTime(long startTime){
 		this.startTime = startTime;
+	}
+
+	public void setAverageServiceTime(int averageServiceTime){
+		this.averageServiceTime = averageServiceTime;
 	}
 
 	public void setPassengers(Passenger[] passengers){
@@ -44,7 +50,6 @@ public class SimulationContext{
 		if(lengths.get(queue) < queue.size()){
 			lengths.put(queue, queue.size());
 		}
-
 	}
 	
 	public void addQueue(BlockingQueue<Passenger> queue){
@@ -56,6 +61,10 @@ public class SimulationContext{
 		this.stations.add(station);
 	}
 
+	public void passengerServed(){
+		this.passengersServed++;
+	}
+
 	public Passenger[] getPassengers(){
 		return this.passengers;
 	}
@@ -64,8 +73,16 @@ public class SimulationContext{
 		return this.startTime;
 	}
 
+	public int getAverageServiceTime(){
+		return this.averageServiceTime;
+	}
+
 	public int getNumPassengers(){
 		return this.numPassengers;
+	}
+
+	public int getPassengersServed(){
+		return this.passengersServed;
 	}
 
 	public int getShortestQueueLength(){

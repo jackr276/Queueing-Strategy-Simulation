@@ -10,7 +10,7 @@ public class Passenger{
 	//Keep track of waiting time for each passenger	
 	private long waitingStartTime;
 	private long waitingEndTime;
-
+	private int processedBy;
 
 	/**
 	 * Keep track of when the passenger starts waiting in line
@@ -23,11 +23,16 @@ public class Passenger{
 	/**
 	 * Keep track of when the passenger stops waiting(dequeued)
 	 */
-	public void stopWaiting(){
+	public void stopWaiting(int queueID){
 		this.waitingEndTime = System.currentTimeMillis();
+		this.processedBy = 	queueID;
 		System.out.println("Stopped waiting");
 	}
 
+	
+	public int getProcessedBy(){
+		return this.processedBy;
+	}
 
 	/**
 	 * Get the waiting time in seconds
