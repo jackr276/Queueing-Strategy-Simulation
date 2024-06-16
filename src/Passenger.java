@@ -10,13 +10,15 @@ public class Passenger{
 	//Keep track of waiting time for each passenger	
 	private long waitingStartTime;
 	private long waitingEndTime;
+	private int queueID;
 	private int processedBy;
 
 	/**
 	 * Keep track of when the passenger starts waiting in line
 	 */
-	public void startWaiting(){
+	public void startWaiting(int queueID){
 		this.waitingStartTime = System.currentTimeMillis();
+		this.queueID = queueID;
 	}
 
 
@@ -32,6 +34,10 @@ public class Passenger{
 	
 	public int getProcessedBy(){
 		return this.processedBy;
+	}
+
+	public int getQueueID(){
+		return this.queueID;
 	}
 
 	/**

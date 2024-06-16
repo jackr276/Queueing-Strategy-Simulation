@@ -3,9 +3,9 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 public class SimulationContext{
-	private int longestQueueLength;
 	private int shortestQueueLength;
 	private int averageServiceTime;
+	private int shortestQueueID;
 	private ArrayList<BlockingQueue<Passenger>> queues;
 	private ArrayList<ServiceStation> stations;
 	private HashMap<BlockingQueue<Passenger>, Integer> lengths;
@@ -15,8 +15,8 @@ public class SimulationContext{
 	private int passengersServed;
 
 	public SimulationContext(){
-		this.longestQueueLength = 0;
 		this.shortestQueueLength = 100;
+		this.shortestQueueID = 0;
 		this.queues = new ArrayList<>();
 		this.stations = new ArrayList<>();
 		this.lengths = new HashMap<>();
@@ -38,6 +38,7 @@ public class SimulationContext{
 	public void setShortestQueueLength(int queueID){
 		if(this.queues.get(queueID).size() < this.shortestQueueLength){
 			this.shortestQueueLength = this.queues.get(queueID).size();
+			this.shortestQueueID = queueID;
 		}
 	}
 

@@ -43,19 +43,6 @@ public class Simulation{
 		ScheduledExecutorService service3 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service4 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service5 = Executors.newScheduledThreadPool(1);
-	
-		ServiceStation station1 = new ServiceStation(averageServiceTime);	
-		ServiceStation station2 = new ServiceStation(averageServiceTime);
-		ServiceStation station3 = new ServiceStation(averageServiceTime);
-		ServiceStation station4 = new ServiceStation(averageServiceTime);
-		ServiceStation station5 = new ServiceStation(averageServiceTime);
-	
-		context.addStation(station1);
-		context.addStation(station2);
-		context.addStation(station3);
-		context.addStation(station4);
-		context.addStation(station5);
-
 
 		//Dispatch thread
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
@@ -110,8 +97,12 @@ public class Simulation{
 		printRuntimeStatistics(context);
 	}
 
-	
+
+	/**
+	 * Queueing simulation with a round robin dispatch strategy
+	 */
 	public static void multi_RoundRobinSimulation(int duration, int averageArrivalTime, int averageServiceTime){
+		//Create the context object that we will use for passing values
 		SimulationContext context = new SimulationContext();
 		context.setStartTime(System.currentTimeMillis());
 		context.setAverageServiceTime(averageServiceTime);
@@ -120,6 +111,7 @@ public class Simulation{
 		int numPassengers = duration / averageArrivalTime;
 		context.setNumPassengers(numPassengers);
 
+		//Initialize the random element for time randomness
 		Random random = new Random(System.currentTimeMillis());
 
 		//5 service lines for this simulation -- one per service station
@@ -137,7 +129,7 @@ public class Simulation{
 
 
 		//5 service stations
-		ScheduledExecutorService service1 = Executors.newScheduledThreadPool(5);
+		ScheduledExecutorService service1 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service2 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service3 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service4 = Executors.newScheduledThreadPool(1);
@@ -145,7 +137,6 @@ public class Simulation{
 	
 		//1 queue for passengers to enter from
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
-
 
 		//Keep an array of passengers for timing
 		Passenger[] passengers = new Passenger[numPassengers];
@@ -160,14 +151,14 @@ public class Simulation{
 			Passenger entrant = passengers[i];
 
 			//Round robin dispatch strategy
-			final int queueNum = i;
+			final int queueNum = i % 5;
 			passengerPool.schedule(() -> enqueue(queueNum, entrant, context), delaySeconds, TimeUnit.SECONDS);
-			service1.schedule(() -> dequeue(queueNum, queueNum, context), 1, TimeUnit.SECONDS);	
 		}
 
 		//Immediately begin dequeueing from the pool, as our stations are already ready to serve
-		for(int i = 0; i < numPassengers / 5; i++){
+		for(int i = 0; i < numPassengers / 4; i++){
 			//Schedule the dequeue for each service station
+			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
 			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
 			service3.schedule(() -> dequeue(2, 2, context), 1, TimeUnit.SECONDS);	
 			service4.schedule(() -> dequeue(3, 3, context), 1, TimeUnit.SECONDS);	
@@ -194,21 +185,20 @@ public class Simulation{
 		printRuntimeStatistics(context);	
 	}
 
-
+	
+	/**
+	 * Simulation in which the shortest queue is always chosen for entrants
+	 */
 	public static void multi_ShortestQueueSimulation(int duration, int averageArrivalTime, int averageServiceTime){
-				
-	}
-
-
-	public static void multi_RandomQueueSimulation(int duration, int averageArrivalTime, int averageServiceTime){
+		//Initialize the context object that we will use for passing values
 		SimulationContext context = new SimulationContext();
 		context.setStartTime(System.currentTimeMillis());
+		context.setAverageServiceTime(averageServiceTime);
 
 		//Num passengers will be the duration divided by average arrival
 		int numPassengers = duration / averageArrivalTime;
 		context.setNumPassengers(numPassengers);
 
-		//For our random queue enqueueing
 		Random random = new Random(System.currentTimeMillis());
 
 		//5 service lines for this simulation -- one per service station
@@ -231,10 +221,112 @@ public class Simulation{
 		ScheduledExecutorService service3 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service4 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service5 = Executors.newScheduledThreadPool(1);
+	
 		//1 queue for passengers to enter from
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
 
-		int delaySeconds = 0;
+
+		//Keep an array of passengers for timing
+		Passenger[] passengers = new Passenger[numPassengers];
+		context.setPassengers(passengers);
+		
+		//Schedule all of the passengers
+		for(int i = 0; i < numPassengers; i++){
+			//Calculate the arrival time with a random element
+			int delaySeconds = i * averageArrivalTime + random.nextInt(-2, 2);
+			//Make our new passenger
+			passengers[i] = new Passenger();
+			Passenger entrant = passengers[i];
+
+			//Shortest queue dispatch strategy
+			passengerPool.schedule(() -> enqueue(context.getShortestQueueLength(), entrant, context), delaySeconds, TimeUnit.SECONDS);
+		}
+
+		//Immediately begin dequeueing from the pool, as our stations are already ready to serve
+		for(int i = 0; i < numPassengers / 4; i++){
+			//Schedule the dequeue for each service station
+			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
+			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
+			service3.schedule(() -> dequeue(2, 2, context), 1, TimeUnit.SECONDS);	
+			service4.schedule(() -> dequeue(3, 3, context), 1, TimeUnit.SECONDS);	
+			service5.schedule(() -> dequeue(4, 4, context), 1, TimeUnit.SECONDS);	
+		}
+
+		//Shutdown
+		service1.shutdown();
+		service2.shutdown();
+		service3.shutdown();
+		service4.shutdown();
+		service5.shutdown();
+		passengerPool.shutdown();
+	
+		//Blocking while loop for service station termination
+		while(  !service1.isTerminated() ||
+				!service2.isTerminated() || 
+				!service3.isTerminated() || 
+				!service4.isTerminated() ||
+				!service5.isTerminated() ||
+				!passengerPool.isTerminated());
+
+		//Print runtime statistics to the console
+		printRuntimeStatistics(context);			
+	}
+
+
+	/**
+	 * A simulation where each entrant is assigned to a queue at random
+	 */
+	public static void multi_RandomQueueSimulation(int duration, int averageArrivalTime, int averageServiceTime){
+		SimulationContext context = new SimulationContext();
+		context.setStartTime(System.currentTimeMillis());
+		context.setAverageServiceTime(averageServiceTime);
+
+		//Num passengers will be the duration divided by average arrival
+		int numPassengers = duration / averageArrivalTime;
+		context.setNumPassengers(numPassengers);
+
+		//For our random queue enqueueing
+		Random random = new Random(System.currentTimeMillis());
+
+		//5 service lines for this simulation -- one per service station
+		BlockingQueue<Passenger> service1_line = new LinkedBlockingQueue<>(numPassengers);
+		BlockingQueue<Passenger> service2_line = new LinkedBlockingQueue<>(numPassengers);
+		BlockingQueue<Passenger> service3_line = new LinkedBlockingQueue<>(numPassengers);
+		BlockingQueue<Passenger> service4_line = new LinkedBlockingQueue<>(numPassengers);
+		BlockingQueue<Passenger> service5_line = new LinkedBlockingQueue<>(numPassengers);
+
+		context.addQueue(service1_line);
+		context.addQueue(service2_line);
+		context.addQueue(service3_line);
+		context.addQueue(service4_line);
+		context.addQueue(service5_line);
+
+		//5 service stations
+		ScheduledExecutorService service1 = Executors.newScheduledThreadPool(1);
+		ScheduledExecutorService service2 = Executors.newScheduledThreadPool(1);
+		ScheduledExecutorService service3 = Executors.newScheduledThreadPool(1);
+		ScheduledExecutorService service4 = Executors.newScheduledThreadPool(1);
+		ScheduledExecutorService service5 = Executors.newScheduledThreadPool(1);
+		
+		//1 queue for passengers to enter from
+		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
+
+		//Keep an array of passengers for timing
+		Passenger[] passengers = new Passenger[numPassengers];
+		context.setPassengers(passengers);
+
+		//Schedule all of the passengers
+		for(int i = 0; i < numPassengers; i++){
+			//Calculate the arrival time with a random element
+			int	delaySeconds = i * averageArrivalTime + random.nextInt(-2, 2);
+			passengers[i] = new Passenger();
+			Passenger entrant = passengers[i];
+
+			//Random queue dispatch strategy
+			final int queueNum = random.nextInt() % 5;
+			passengerPool.schedule(() -> enqueue(queueNum, entrant, context), delaySeconds, TimeUnit.SECONDS);
+		}
+		
 		//Immediately begin dequeueing from the pool
 		for(int i = 0; i < numPassengers / 5; i++){
 			//Schedule the dequeue for each service station
@@ -245,22 +337,6 @@ public class Simulation{
 			service5.schedule(() -> dequeue(4, 4, context), 1, TimeUnit.SECONDS);	
 		}
 
-
-		//Keep an array of passengers for timing
-		Passenger[] passengers = new Passenger[numPassengers];
-		context.setPassengers(passengers);
-
-		//Schedule all of the passengers
-		for(int i = 0; i < numPassengers; i++){
-			//Calculate the arrival time with a random element
-			delaySeconds = i * averageArrivalTime + random.nextInt(-2, 2);
-			passengers[i] = new Passenger();
-			Passenger entrant = passengers[i];
-
-			//Random queue dispatch strategy
-			final int queueNum = random.nextInt() % 5;
-			passengerPool.schedule(() -> enqueue(queueNum, entrant, context), delaySeconds, TimeUnit.SECONDS);
-		}
 
 		//Shutdown
 		service1.shutdown();
@@ -292,9 +368,9 @@ public class Simulation{
 			//Put the passenger in the queue
 			context.getQueues().get(queueID).put(p);
 			//Set the waiting flag for calculation
-			p.startWaiting();
+			p.startWaiting(queueID);
 
-			//Set the shortest queue length
+			//Update queue lengths in context
 			context.setShortestQueueLength(queueID);
 			context.setLongestQueueLength(queueID);	
 
@@ -303,7 +379,6 @@ public class Simulation{
 			System.out.println(ie.getMessage());
 		}
 	}	
-
 
 
 	/**
@@ -315,18 +390,19 @@ public class Simulation{
 			Random random = new Random(System.currentTimeMillis());
 
 			Passenger dequeued = context.getQueues().get(queueID).take();
-			//There should be no wait if we're the first 5 customers	
-			if(context.getPassengersServed() > 4){
-			//Occupy the service station for a certain number of seconds
-				TimeUnit.SECONDS.sleep(context.getAverageServiceTime() + random.nextInt(-2, 2));
+			if(dequeued != null){
+				//There should be no wait if we're the first 5 customers	
+				if(context.getPassengersServed() > 4){
+				//Occupy the service station for a certain number of seconds
+					TimeUnit.SECONDS.sleep(context.getAverageServiceTime() + random.nextInt(-2, 2));
+				}
+
+				//Set the waiting flag
+				dequeued.stopWaiting(stationID);
+				//Keep track of the passengers served
+				context.passengerServed();
+				System.out.println("Dequeueing");
 			}
-
-			//Set the waiting flag
-			dequeued.stopWaiting(stationID);
-			//Keep track of the passengers served
-			context.passengerServed();
-			System.out.println("Dequeueing");
-
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
@@ -336,18 +412,7 @@ public class Simulation{
 	/**
 	 * A private helper method for printing the runtime statistics to the command line
 	 */
-	private static void printRuntimeStatistics(SimulationContext context){	
-		//Calculate the average waiting time
-		double waitingSum = 0;
-		double maximumWaitTime = 0;
-		for(int i = 0; i < context.getPassengers().length; i++){
-			double waitTime = context.getPassengers()[i].getWaitingTime();
-			if(waitTime > maximumWaitTime){
-				maximumWaitTime = waitTime;
-			}
-			waitingSum += waitTime;
-		}
-
+	private static void printRuntimeStatistics(SimulationContext context){		
 		long simulationDuration = ((System.currentTimeMillis() - context.getStartTime()) / 1000);
 
 		//Display program statistics for user
@@ -355,8 +420,8 @@ public class Simulation{
 		System.out.println("Program Runtime: " + simulationDuration + " seconds\n");
 		for(int i = 0; i < context.getQueues().size(); i++){
 			System.out.println("Queue " + (i + 1) + " Statistics: ");
-			System.out.printf("\tAverage waiting time: %.2f seconds\n", (waitingSum / context.getPassengers().length));
-			System.out.printf("\tMaximum waiting time: %.2f seconds\n", maximumWaitTime);	
+			System.out.printf("\tAverage waiting time: %.2f seconds\n", getAverageWaitTime(context, i));
+			System.out.printf("\tMaximum waiting time: %.2f seconds\n", getMaxWaitTime(context, i));	
 			System.out.println("\tLongest length: " + context.getLongestQueueLength(i));
 		}
 
@@ -373,5 +438,35 @@ public class Simulation{
 		}
 
 		System.out.println("\n\n=============================================================");	
+	}
+
+
+	/**
+	 * A private helper function that gets the average waiting time for a queue
+	 */
+	private static double getAverageWaitTime(SimulationContext context, int queueID){
+		double waitingSum = 0;
+		int passengersInQueue = 0;
+		for(Passenger passenger : context.getPassengers()){
+			if(passenger.getQueueID() == queueID){
+				waitingSum += passenger.getWaitingTime();
+				passengersInQueue++;
+			}
+		}
+		return waitingSum / passengersInQueue;
+	}
+
+
+	/**
+	 * A private helper method that gets the maximum waiting time for a given queue
+	 */
+	private static double getMaxWaitTime(SimulationContext context, int queueID){
+		double maximumWaitTime = 0;
+		for(Passenger passenger : context.getPassengers()){
+			if(passenger.getQueueID() == queueID && passenger.getWaitingTime() > maximumWaitTime){
+				maximumWaitTime = passenger.getWaitingTime();
+			}
+		}
+		return maximumWaitTime;
 	}
 }
