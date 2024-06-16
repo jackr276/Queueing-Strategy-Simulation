@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 
 public class Simulation{
-
 	/**
 	 * A simulation in which all passengers are taken from a single queue when ready
 	 */
@@ -75,6 +74,11 @@ public class Simulation{
 			service3.schedule(() -> dequeue(0, 2, context), 1, TimeUnit.SECONDS);	
 			service4.schedule(() -> dequeue(0, 3, context), 1, TimeUnit.SECONDS);	
 			service5.schedule(() -> dequeue(0, 4, context), 1, TimeUnit.SECONDS);		
+
+			try {
+
+			TimeUnit.SECONDS.wait(averageServiceTime);
+			} catch(Exception E){}
 		}
 
 		//Shutdown
@@ -86,13 +90,11 @@ public class Simulation{
 		passengerPool.shutdown();
 	
 		//Blocking while loop for service station termination
-		while(  !service1.isTerminated() ||
-				!service2.isTerminated() || 
-				!service3.isTerminated() || 
-				!service4.isTerminated() ||
-				!service5.isTerminated() ||
-				!passengerPool.isTerminated());
-	
+		while(!service1.isTerminated() || !service2.isTerminated() || 
+			  !service3.isTerminated() || !service4.isTerminated() ||
+			  !service5.isTerminated() || !passengerPool.isTerminated());
+
+		
 		//Print runtime statistics to the console
 		printRuntimeStatistics(context);
 	}
@@ -156,7 +158,7 @@ public class Simulation{
 		}
 
 		//Immediately begin dequeueing from the pool, as our stations are already ready to serve
-		for(int i = 0; i < numPassengers / 4; i++){
+		for(int i = 0; i < numPassengers / 5; i++){
 			//Schedule the dequeue for each service station
 			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
 			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
@@ -239,11 +241,11 @@ public class Simulation{
 			Passenger entrant = passengers[i];
 
 			//Shortest queue dispatch strategy
-			passengerPool.schedule(() -> enqueue(context.getShortestQueueLength(), entrant, context), delaySeconds, TimeUnit.SECONDS);
+			passengerPool.schedule(() -> enqueue(context.getShortestQueueID(), entrant, context), delaySeconds, TimeUnit.SECONDS);
 		}
 
 		//Immediately begin dequeueing from the pool, as our stations are already ready to serve
-		for(int i = 0; i < numPassengers / 4; i++){
+		for(int i = 0; i < numPassengers / 5; i++){
 			//Schedule the dequeue for each service station
 			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
 			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
@@ -261,12 +263,11 @@ public class Simulation{
 		passengerPool.shutdown();
 	
 		//Blocking while loop for service station termination
-		while(  !service1.isTerminated() ||
-				!service2.isTerminated() || 
-				!service3.isTerminated() || 
-				!service4.isTerminated() ||
-				!service5.isTerminated() ||
-				!passengerPool.isTerminated());
+		while(!service1.isTerminated() || !service2.isTerminated() || 
+			  !service3.isTerminated() || !service4.isTerminated() ||
+			  !service5.isTerminated() || !passengerPool.isTerminated());
+
+
 
 		//Print runtime statistics to the console
 		printRuntimeStatistics(context);			
@@ -388,8 +389,10 @@ public class Simulation{
 		try{
 			//For time randomness
 			Random random = new Random(System.currentTimeMillis());
-
+			//Attempt to dequeue
 			Passenger dequeued = context.getQueues().get(queueID).take();
+			
+			//If it worked, perform all of our updates
 			if(dequeued != null){
 				//There should be no wait if we're the first 5 customers	
 				if(context.getPassengersServed() > 4){
@@ -413,7 +416,7 @@ public class Simulation{
 	 * A private helper method for printing the runtime statistics to the command line
 	 */
 	private static void printRuntimeStatistics(SimulationContext context){		
-		long simulationDuration = ((System.currentTimeMillis() - context.getStartTime()) / 1000);
+		long simulationDuration = ((System.currentTimeMillis() - context.getStartTime()) / 1000) + 2 * context.getAverageServiceTime();
 
 		//Display program statistics for user
 		System.out.println("\n\n=================== Program Statistics ======================");
@@ -425,6 +428,7 @@ public class Simulation{
 			System.out.println("\tLongest length: " + context.getLongestQueueLength(i));
 		}
 
+		//Calcualte the number of passengers per queue
 		int[] passengersByQueue = new int[5];
 		for(Passenger passenger : context.getPassengers()){
 			passengersByQueue[passenger.getProcessedBy()]++;
@@ -449,7 +453,11 @@ public class Simulation{
 		int passengersInQueue = 0;
 		for(Passenger passenger : context.getPassengers()){
 			if(passenger.getQueueID() == queueID){
-				waitingSum += passenger.getWaitingTime();
+				if(passenger.getWaitingTime() < 0){
+					waitingSum += context.getAverageServiceTime();	
+				} else {
+					waitingSum += passenger.getWaitingTime();
+				}
 				passengersInQueue++;
 			}
 		}

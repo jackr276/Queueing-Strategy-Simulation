@@ -1,3 +1,11 @@
+/**
+ * Author: Jack Robbins, jmr226
+ * CS 610, Programming Assignment 1
+ *
+ * This class is the context object that is used for passing parameters between methods in Simulation.java
+ */
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
@@ -7,7 +15,6 @@ public class SimulationContext{
 	private int averageServiceTime;
 	private int shortestQueueID;
 	private ArrayList<BlockingQueue<Passenger>> queues;
-	private ArrayList<ServiceStation> stations;
 	private HashMap<BlockingQueue<Passenger>, Integer> lengths;
 	private long startTime;
 	private int numPassengers;
@@ -18,7 +25,6 @@ public class SimulationContext{
 		this.shortestQueueLength = 100;
 		this.shortestQueueID = 0;
 		this.queues = new ArrayList<>();
-		this.stations = new ArrayList<>();
 		this.lengths = new HashMap<>();
 		this.passengersServed = 0;
 	}	
@@ -58,10 +64,6 @@ public class SimulationContext{
 		this.lengths.put(queue, 0); 
 	}
 
-	public void addStation(ServiceStation station){
-		this.stations.add(station);
-	}
-
 	public void passengerServed(){
 		this.passengersServed++;
 	}
@@ -82,22 +84,42 @@ public class SimulationContext{
 		return this.numPassengers;
 	}
 
+	
+	/**
+	 * A simple helper method to get the number of passengers served
+	 */
 	public int getPassengersServed(){
 		return this.passengersServed;
 	}
 
+
+	/**
+	 * A simple helper method to get the length of the shortest queue
+	 */
 	public int getShortestQueueLength(){
 		return this.shortestQueueLength;
 	}
 
+
+	/**
+	 * A simple helper method to get the ID of the shortest queue
+	 */
+	public int getShortestQueueID(){
+		return this.shortestQueueID;
+	}
+
+
+	/**
+	 * A simple helper method to get the list of queues
+	 */
 	public ArrayList<BlockingQueue<Passenger>> getQueues(){
 		return this.queues;
 	}
 
-	public ArrayList<ServiceStation> getStations(){
-		return this.stations;
-	}
 
+	/**
+	 * Simple helper method to return longest queue length
+	 */
 	public int getLongestQueueLength(int queueID){
 		return this.lengths.get(this.queues.get(queueID));
 	}

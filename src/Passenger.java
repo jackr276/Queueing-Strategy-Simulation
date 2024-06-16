@@ -32,13 +32,21 @@ public class Passenger{
 	}
 
 	
+	/**
+	 * Keep track of which service station served the passenger
+	 */
 	public int getProcessedBy(){
 		return this.processedBy;
 	}
 
+
+	/**
+	 * Return which queue the passenger belonged to
+	 */
 	public int getQueueID(){
 		return this.queueID;
 	}
+
 
 	/**
 	 * Get the waiting time in seconds
