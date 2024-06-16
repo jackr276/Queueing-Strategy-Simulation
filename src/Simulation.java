@@ -66,19 +66,26 @@ public class Simulation{
 		}
 
 		//Immediately begin dequeueing from the pool
-		for(int i = 0; i < numPassengers / 5; i++){
+		for(int i = 0; i < numPassengers; i++){
 			//When the pool is empty, each service station is ready to dequeue	
 			//Schedule the dequeue for each service station
-			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
-			service2.schedule(() -> dequeue(0, 1, context), 1, TimeUnit.SECONDS);	
-			service3.schedule(() -> dequeue(0, 2, context), 1, TimeUnit.SECONDS);	
-			service4.schedule(() -> dequeue(0, 3, context), 1, TimeUnit.SECONDS);	
-			service5.schedule(() -> dequeue(0, 4, context), 1, TimeUnit.SECONDS);		
-
-			try {
-
-			TimeUnit.SECONDS.wait(averageServiceTime);
-			} catch(Exception E){}
+			switch(i % 5){
+				case 0: 
+					service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
+					break;
+				case 1:
+					service2.schedule(() -> dequeue(0, 1, context), 1, TimeUnit.SECONDS);	
+					break;
+				case 2:	
+					service3.schedule(() -> dequeue(0, 2, context), 1, TimeUnit.SECONDS);	
+					break;
+				case 3:
+					service4.schedule(() -> dequeue(0, 3, context), 1, TimeUnit.SECONDS);	
+					break;
+				case 4:	
+					service5.schedule(() -> dequeue(0, 4, context), 1, TimeUnit.SECONDS);		
+					break;
+			}
 		}
 
 		//Shutdown
@@ -160,6 +167,7 @@ public class Simulation{
 			occupancy[queueNum]++;
 		}
 
+		//Schedule the appropriate dequeue based on occupancy
 		for(int i = 0; i < occupancy[0]; i++){
 			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
 		}
@@ -180,16 +188,6 @@ public class Simulation{
 			service5.schedule(() -> dequeue(4, 4, context), 1, TimeUnit.SECONDS);	
 		}
 		
-		/*
-		//Immediately begin dequeueing from the pool, as our stations are already ready to serve
-		for(int i = 0; i < numPassengers / 5; i++){
-			//Schedule the dequeue for each service station
-			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
-			service3.schedule(() -> dequeue(2, 2, context), 1, TimeUnit.SECONDS);	
-			service4.schedule(() -> dequeue(3, 3, context), 1, TimeUnit.SECONDS);	
-			service5.schedule(() -> dequeue(4, 4, context), 1, TimeUnit.SECONDS);	
-		}
-		*/
 
 		//Shutdown
 		service1.shutdown();
@@ -256,6 +254,8 @@ public class Simulation{
 		Passenger[] passengers = new Passenger[numPassengers];
 		context.setPassengers(passengers);
 		
+		int[] occupancy = new int[5];
+
 		//Schedule all of the passengers
 		for(int i = 0; i < numPassengers; i++){
 			//Calculate the arrival time with a random element
@@ -263,18 +263,31 @@ public class Simulation{
 			//Make our new passenger
 			passengers[i] = new Passenger();
 			Passenger entrant = passengers[i];
-
+			
+			final int shortestQueue = context.getShortestQueueID();
 			//Shortest queue dispatch strategy
-			passengerPool.schedule(() -> enqueue(context.getShortestQueueID(), entrant, context), delaySeconds, TimeUnit.SECONDS);
+			passengerPool.schedule(() -> enqueue(shortestQueue, entrant, context), delaySeconds, TimeUnit.SECONDS);
+			occupancy[shortestQueue]++;
 		}
 
-		//Immediately begin dequeueing from the pool, as our stations are already ready to serve
-		for(int i = 0; i < numPassengers / 5; i++){
-			//Schedule the dequeue for each service station
+		//Schedule the appropriate dequeue based on occupancy
+		for(int i = 0; i < occupancy[0]; i++){
 			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[1]; i++){
 			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[2]; i++){
 			service3.schedule(() -> dequeue(2, 2, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[3]; i++){
 			service4.schedule(() -> dequeue(3, 3, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[4]; i++){
 			service5.schedule(() -> dequeue(4, 4, context), 1, TimeUnit.SECONDS);	
 		}
 
@@ -340,6 +353,8 @@ public class Simulation{
 		Passenger[] passengers = new Passenger[numPassengers];
 		context.setPassengers(passengers);
 
+		int[] occupancy = new int[5];
+
 		//Schedule all of the passengers
 		for(int i = 0; i < numPassengers; i++){
 			//Calculate the arrival time with a random element
@@ -348,20 +363,31 @@ public class Simulation{
 			Passenger entrant = passengers[i];
 
 			//Random queue dispatch strategy
-			final int queueNum = random.nextInt() % 5;
+			final int queueNum = random.nextInt(0, 5);
 			passengerPool.schedule(() -> enqueue(queueNum, entrant, context), delaySeconds, TimeUnit.SECONDS);
-		}
-		
-		//Immediately begin dequeueing from the pool
-		for(int i = 0; i < numPassengers / 5; i++){
-			//Schedule the dequeue for each service station
-			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
-			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
-			service3.schedule(() -> dequeue(2, 2, context), 1, TimeUnit.SECONDS);	
-			service4.schedule(() -> dequeue(3, 3, context), 1, TimeUnit.SECONDS);	
-			service5.schedule(() -> dequeue(4, 4, context), 1, TimeUnit.SECONDS);	
+			occupancy[queueNum]++;
 		}
 
+		//Schedule the appropriate dequeue based on occupancy
+		for(int i = 0; i < occupancy[0]; i++){
+			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[1]; i++){
+			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[2]; i++){
+			service3.schedule(() -> dequeue(2, 2, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[3]; i++){
+			service4.schedule(() -> dequeue(3, 3, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[4]; i++){
+			service5.schedule(() -> dequeue(4, 4, context), 1, TimeUnit.SECONDS);	
+		}
 
 		//Shutdown
 		service1.shutdown();
