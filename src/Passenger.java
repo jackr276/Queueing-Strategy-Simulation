@@ -19,6 +19,7 @@ public class Passenger{
 	public void startWaiting(int queueID){
 		this.waitingStartTime = System.currentTimeMillis();
 		this.queueID = queueID;
+		this.processedBy = -1;
 	}
 
 

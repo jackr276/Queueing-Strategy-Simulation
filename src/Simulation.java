@@ -144,6 +144,8 @@ public class Simulation{
 		Passenger[] passengers = new Passenger[numPassengers];
 		context.setPassengers(passengers);
 
+		int[] occupancy = new int[5];
+
 		//Schedule all of the passengers
 		for(int i = 0; i < numPassengers; i++){
 			//Calculate the arrival time with a random element
@@ -155,17 +157,39 @@ public class Simulation{
 			//Round robin dispatch strategy
 			final int queueNum = i % 5;
 			passengerPool.schedule(() -> enqueue(queueNum, entrant, context), delaySeconds, TimeUnit.SECONDS);
+			occupancy[queueNum]++;
 		}
 
+		for(int i = 0; i < occupancy[0]; i++){
+			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[1]; i++){
+			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[2]; i++){
+			service3.schedule(() -> dequeue(2, 2, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[3]; i++){
+			service4.schedule(() -> dequeue(3, 3, context), 1, TimeUnit.SECONDS);	
+		}
+
+		for(int i = 0; i < occupancy[4]; i++){
+			service5.schedule(() -> dequeue(4, 4, context), 1, TimeUnit.SECONDS);	
+		}
+		
+		/*
 		//Immediately begin dequeueing from the pool, as our stations are already ready to serve
 		for(int i = 0; i < numPassengers / 5; i++){
 			//Schedule the dequeue for each service station
-			service1.schedule(() -> dequeue(0, 0, context), 1, TimeUnit.SECONDS);	
 			service2.schedule(() -> dequeue(1, 1, context), 1, TimeUnit.SECONDS);	
 			service3.schedule(() -> dequeue(2, 2, context), 1, TimeUnit.SECONDS);	
 			service4.schedule(() -> dequeue(3, 3, context), 1, TimeUnit.SECONDS);	
 			service5.schedule(() -> dequeue(4, 4, context), 1, TimeUnit.SECONDS);	
 		}
+		*/
 
 		//Shutdown
 		service1.shutdown();
@@ -416,7 +440,7 @@ public class Simulation{
 	 * A private helper method for printing the runtime statistics to the command line
 	 */
 	private static void printRuntimeStatistics(SimulationContext context){		
-		long simulationDuration = ((System.currentTimeMillis() - context.getStartTime()) / 1000) + 2 * context.getAverageServiceTime();
+		long simulationDuration = ((System.currentTimeMillis() - context.getStartTime()) / 1000);
 
 		//Display program statistics for user
 		System.out.println("\n\n=================== Program Statistics ======================");
@@ -431,6 +455,7 @@ public class Simulation{
 		//Calcualte the number of passengers per queue
 		int[] passengersByQueue = new int[5];
 		for(Passenger passenger : context.getPassengers()){
+			if(passenger.getProcessedBy() == -1) continue;
 			passengersByQueue[passenger.getProcessedBy()]++;
 		}
 
