@@ -29,7 +29,6 @@ public class Passenger{
 	public void stopWaiting(int queueID){
 		this.waitingEndTime = System.currentTimeMillis();
 		this.processedBy = 	queueID;
-		System.out.println("Stopped waiting");
 	}
 
 	

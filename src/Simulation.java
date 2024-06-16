@@ -255,16 +255,28 @@ public class Simulation{
 		context.setPassengers(passengers);
 		
 		int[] occupancy = new int[5];
+		
+		int shortestQueueID = 0;
 
 		//Schedule all of the passengers
-		for(int i = 0; i < numPassengers; i++){
+		for(int i = 0; i < numPassengers; i++){	
+	
+			//Recalculate shortest queue
+			int shortestQueueLength = 100;
+			for(int j = 0; j < 5; j++){
+				if(occupancy[j] < shortestQueueLength){
+					shortestQueueID = j;
+					shortestQueueLength = occupancy[j];
+				}
+			}
+
 			//Calculate the arrival time with a random element
 			int delaySeconds = i * averageArrivalTime + random.nextInt(-2, 2);
 			//Make our new passenger
 			passengers[i] = new Passenger();
 			Passenger entrant = passengers[i];
 			
-			final int shortestQueue = context.getShortestQueueID();
+			final int shortestQueue = shortestQueueID;
 			//Shortest queue dispatch strategy
 			passengerPool.schedule(() -> enqueue(shortestQueue, entrant, context), delaySeconds, TimeUnit.SECONDS);
 			occupancy[shortestQueue]++;
@@ -422,10 +434,9 @@ public class Simulation{
 			p.startWaiting(queueID);
 
 			//Update queue lengths in context
-			context.setShortestQueueLength(queueID);
 			context.setLongestQueueLength(queueID);	
 
-			System.out.println("Enqueueing");
+			System.out.println("Enqueueing into queue: " + queueID);
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
 		}
@@ -454,7 +465,7 @@ public class Simulation{
 				dequeued.stopWaiting(stationID);
 				//Keep track of the passengers served
 				context.passengerServed();
-				System.out.println("Dequeueing");
+				System.out.println("Station " + stationID + " dequeueing from queue: " + queueID);
 			}
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
