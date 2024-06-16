@@ -25,6 +25,7 @@ public class Passenger{
 	 */
 	public void stopWaiting(){
 		this.waitingEndTime = System.currentTimeMillis();
+		System.out.println("Stopped waiting");
 	}
 
 
