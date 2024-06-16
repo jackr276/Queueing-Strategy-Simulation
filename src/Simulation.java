@@ -19,23 +19,25 @@ import java.util.concurrent.TimeUnit;
 
 
 public class Simulation{
-	//Shortest and longest queue tracking -- may change	
-	private static int shortestQueueLength = 100;
-
 
 	/**
 	 * A simulation in which all passengers are taken from a single queue when ready
 	 */
 	public static void single_QueueSimulation(int duration, int averageArrivalTime, int averageServiceTime){
-		long startTime = System.currentTimeMillis();
+		//Create a context object that we will use for passing values
 		SimulationContext context = new SimulationContext();
-		context.setLongestQueueLength(0);
+		context.setStartTime(System.currentTimeMillis());
+		
 		//Num passengers will be the duration divided by average arrival
 		int numPassengers = duration / averageArrivalTime;
+		context.setNumPassengers(numPassengers);	
+
 		Random random = new Random(System.currentTimeMillis());
+
 
 		//Single blocking queue for all of our passengers
 		BlockingQueue<Passenger> line = new LinkedBlockingQueue<>(numPassengers);
+		context.addQueue(line);	
 
 		//5 service stations
 		ScheduledExecutorService service1 = Executors.newScheduledThreadPool(1);
@@ -49,8 +51,13 @@ public class Simulation{
 		ServiceStation station3 = new ServiceStation();
 		ServiceStation station4 = new ServiceStation();
 		ServiceStation station5 = new ServiceStation();
-			
-		ServiceStation[] stations = {station1,station2, station3, station4, station5};
+
+		context.addStation(station1);
+		context.addStation(station2);
+		context.addStation(station3);
+		context.addStation(station4);
+		context.addStation(station5);
+
 
 		//Dispatch thread
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
@@ -76,6 +83,8 @@ public class Simulation{
 
 		//Keep an array of passengers for timing
 		Passenger[] passengers = new Passenger[numPassengers];
+		context.setPassengers(passengers);
+
 
 		for(int i = 0; i < numPassengers; i++){
 			//+/- 2 seconds randomly for arrival
@@ -104,18 +113,18 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(passengers, numPassengers, stations, startTime, false, context);
+		printRuntimeStatistics(false, context);
 	}
 
 	
 	public static void multi_RoundRobinSimulation(int duration, int averageArrivalTime, int averageServiceTime){
-		long startTime = System.currentTimeMillis();
 		SimulationContext context = new SimulationContext();
-		context.setLongestQueueLength(0);
-
+		context.setStartTime(System.currentTimeMillis());
 
 		//Num passengers will be the duration divided by average arrival
 		int numPassengers = duration / averageArrivalTime;
+		context.setNumPassengers(numPassengers);
+
 		Random random = new Random(System.currentTimeMillis());
 
 		//5 service lines for this simulation -- one per service station
@@ -137,9 +146,12 @@ public class Simulation{
 		ServiceStation station3 = new ServiceStation();
 		ServiceStation station4 = new ServiceStation();
 		ServiceStation station5 = new ServiceStation();
-			
-		ServiceStation[] stations = {station1, station2, station3, station4, station5};
-
+	
+		context.addStation(station1);
+		context.addStation(station2);
+		context.addStation(station3);
+		context.addStation(station4);
+		context.addStation(station5);
 
 		//1 queue for passengers to enter from
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
@@ -166,6 +178,8 @@ public class Simulation{
 		
 		//Keep an array of passengers for timing
 		Passenger[] passengers = new Passenger[numPassengers];
+		context.setPassengers(passengers);
+
 
 		//Schedule all of the passengers
 		for(int i = 0; i < numPassengers; i++){
@@ -216,7 +230,7 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(passengers, numPassengers, stations, startTime, true, context);	
+		printRuntimeStatistics(true, context);	
 	}
 
 
@@ -226,12 +240,13 @@ public class Simulation{
 
 
 	public static void multi_RandomQueueSimulation(int duration, int averageArrivalTime, int averageServiceTime){
-		long startTime = System.currentTimeMillis();
 		SimulationContext context = new SimulationContext();
-		context.setLongestQueueLength(0);
+		context.setStartTime(System.currentTimeMillis());
 
 		//Num passengers will be the duration divided by average arrival
 		int numPassengers = duration / averageArrivalTime;
+		context.setNumPassengers(numPassengers);
+
 		//For our random queue enqueueing
 		Random random = new Random(System.currentTimeMillis());
 
@@ -273,6 +288,7 @@ public class Simulation{
 	
 		//Keep an array of passengers for timing
 		Passenger[] passengers = new Passenger[numPassengers];
+		context.setPassengers(passengers);
 
 		//Schedule all of the passengers
 		for(int i = 0; i < numPassengers; i++){
@@ -323,7 +339,7 @@ public class Simulation{
 	
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(passengers, numPassengers, new ServiceStation[5], startTime, true, context);	
+		printRuntimeStatistics(true, context);	
 	}
 
 
@@ -336,6 +352,8 @@ public class Simulation{
 			//Set the waiting flag for calculation
 			p.startWaiting();
 
+			//Set the shortest queue length
+			context.setShortestQueueLength(queue.size());
 			//Maintain the shortest and longest length for the queue
 			if (queue.size() > context.getLongestQueueLength()){
 				context.setLongestQueueLength(queue.size());
@@ -368,27 +386,31 @@ public class Simulation{
 	/**
 	 * A private helper method for printing the runtime statistics to the command line
 	 */
-	private static void printRuntimeStatistics(Passenger[] passengers, int numPassengers, ServiceStation[] stations, long startTime, boolean is_multi, SimulationContext context){	
+	private static void printRuntimeStatistics(boolean is_multi, SimulationContext context){	
 		//Calculate the average waiting time
 		double waitingSum = 0;
 		double maximumWaitTime = 0;
-		for(int i = 0; i < passengers.length; i++){
-			double waitTime = passengers[i].getWaitingTime();
+		for(int i = 0; i < context.getPassengers().length; i++){
+			double waitTime = context.getPassengers()[i].getWaitingTime();
 			if(waitTime > maximumWaitTime){
 				maximumWaitTime = waitTime;
 			}
 			waitingSum += waitTime;
 		}
 
-		long simulationDuration = (System.currentTimeMillis() - startTime) / 1000;
+		long simulationDuration = (System.currentTimeMillis() - context.getStartTime()) / 1000;
 
 		//Display program statistics for user
 		System.out.println("\n\n=================== Program Statistics ======================");
 		System.out.println("Program Runtime: " + simulationDuration + " seconds");
-		System.out.printf("Average waiting time: %.2f seconds\n", (waitingSum / passengers.length));
-		System.out.printf("Maximum waiting time: %.2f seconds\n", maximumWaitTime);
-		System.out.println("Longest queue length: " + context.getLongestQueueLength());
-		System.out.println("\nService Time Waiting Percentages");	
+		for(int i = 0; i < context.getQueues().size(); i++){
+			System.out.println("Queue " + (i + 1) + " Statistics: ");
+			System.out.printf("\tAverage waiting time: %.2f seconds\n", (waitingSum / context.getPassengers().length));
+			System.out.printf("\tMaximum waiting time: %.2f seconds\n", maximumWaitTime);	
+			System.out.println("\tLongest length: " + context.getLongestQueueLength());
+		}
+
+		System.out.println("\nService Time Waiting Percentages");
 		//Print out the percentage of active time per station
 		for(int i = 0; i < 5; i++){
 //			System.out.printf("Station %d: active %d%% of the time\n", i + 1, stations[i].getTimeOccupied());
