@@ -18,6 +18,7 @@ public class SimulationContext{
 		this.shortestQueueLength = 100;
 		this.queues = new ArrayList<>();
 		this.stations = new ArrayList<>();
+		this.lengths = new HashMap<>();
 	}	
 
 	public void setStartTime(long startTime){
@@ -28,9 +29,9 @@ public class SimulationContext{
 		this.passengers = passengers;
 	}
 
-	public void setShortestQueueLength(int length){
-		if(length < this.shortestQueueLength){
-			this.shortestQueueLength = length;
+	public void setShortestQueueLength(int queueID){
+		if(this.queues.get(queueID).size() < this.shortestQueueLength){
+			this.shortestQueueLength = this.queues.get(queueID).size();
 		}
 	}
 
@@ -38,12 +39,17 @@ public class SimulationContext{
 		this.numPassengers = numPassengers; 
 	}
 
-	public void setLongestQueueLength(int longestQueueLength){
-		this.longestQueueLength = longestQueueLength;
+	public void setLongestQueueLength(int queueID){
+		BlockingQueue<Passenger> queue = this.queues.get(queueID);
+		if(lengths.get(queue) < queue.size()){
+			lengths.put(queue, queue.size());
+		}
+
 	}
 	
 	public void addQueue(BlockingQueue<Passenger> queue){
 		this.queues.add(queue);
+		this.lengths.put(queue, 0); 
 	}
 
 	public void addStation(ServiceStation station){
@@ -74,8 +80,8 @@ public class SimulationContext{
 		return this.stations;
 	}
 
-	public int getLongestQueueLength(){
-		return this.longestQueueLength;
+	public int getLongestQueueLength(int queueID){
+		return this.lengths.get(this.queues.get(queueID));
 	}
 
 }

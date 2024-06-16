@@ -10,6 +10,7 @@
  * 	- Multiple queues with a random queue dispatch
  */
 
+import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
@@ -31,9 +32,6 @@ public class Simulation{
 		//Num passengers will be the duration divided by average arrival
 		int numPassengers = duration / averageArrivalTime;
 		context.setNumPassengers(numPassengers);	
-
-		Random random = new Random(System.currentTimeMillis());
-
 
 		//Single blocking queue for all of our passengers
 		BlockingQueue<Passenger> line = new LinkedBlockingQueue<>(numPassengers);
@@ -62,6 +60,10 @@ public class Simulation{
 		//Dispatch thread
 		ScheduledExecutorService passengerPool = Executors.newScheduledThreadPool(1);
 
+		//Initialize a random for some randomness in times
+		Random random = new Random(System.currentTimeMillis());
+
+
 		int delaySeconds = 0;
 		//Immediately begin dequeueing from the pool
 		for(int i = 0; i < numPassengers / 5; i++){
@@ -74,11 +76,11 @@ public class Simulation{
 			final int processingTime = (delaySeconds == 0) ? averageServiceTime : delaySeconds;
 
 			//Schedule the dequeue for each service station
-			service1.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
-			service2.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
-			service3.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
-			service4.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
-			service5.schedule(() -> dequeue(line), delaySeconds, TimeUnit.SECONDS);	
+			service1.schedule(() -> dequeue(0, context), delaySeconds, TimeUnit.SECONDS);	
+			service2.schedule(() -> dequeue(0, context), delaySeconds, TimeUnit.SECONDS);	
+			service3.schedule(() -> dequeue(0, context), delaySeconds, TimeUnit.SECONDS);	
+			service4.schedule(() -> dequeue(0, context), delaySeconds, TimeUnit.SECONDS);	
+			service5.schedule(() -> dequeue(0, context), delaySeconds, TimeUnit.SECONDS);	
 		}
 
 		//Keep an array of passengers for timing
@@ -93,7 +95,7 @@ public class Simulation{
 			//Local copy to avoid compile error
 			Passenger entrant = passengers[i];
 			//Schedule passenger pool entrance
-			passengerPool.schedule(() -> enqueue(line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+			passengerPool.schedule(() -> enqueue(0, entrant, context), delaySeconds, TimeUnit.SECONDS);
 		}
 
 		//Shutdown
@@ -113,7 +115,7 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(false, context);
+		printRuntimeStatistics(context);
 	}
 
 	
@@ -133,6 +135,13 @@ public class Simulation{
 		BlockingQueue<Passenger> service3_line = new LinkedBlockingQueue<>(numPassengers);
 		BlockingQueue<Passenger> service4_line = new LinkedBlockingQueue<>(numPassengers);
 		BlockingQueue<Passenger> service5_line = new LinkedBlockingQueue<>(numPassengers);
+
+		context.addQueue(service1_line);
+		context.addQueue(service2_line);
+		context.addQueue(service3_line);
+		context.addQueue(service4_line);
+		context.addQueue(service5_line);
+
 
 		//5 service stations
 		ScheduledExecutorService service1 = Executors.newScheduledThreadPool(1);
@@ -165,17 +174,16 @@ public class Simulation{
 				delaySeconds = i * averageServiceTime + random.nextInt(-2, 2);
 			}
 
+			final int processingTime = (delaySeconds == 0) ? averageServiceTime : delaySeconds;
+
+			//Schedule the dequeue for each service station
+			service1.schedule(() -> dequeue(0, context), delaySeconds, TimeUnit.SECONDS);	
+			service2.schedule(() -> dequeue(1, context), delaySeconds, TimeUnit.SECONDS);	
+			service3.schedule(() -> dequeue(2, context), delaySeconds, TimeUnit.SECONDS);	
+			service4.schedule(() -> dequeue(3, context), delaySeconds, TimeUnit.SECONDS);	
+			service5.schedule(() -> dequeue(4, context), delaySeconds, TimeUnit.SECONDS);	
 		}
 
-		final int processingTime = (delaySeconds == 0) ? averageServiceTime : delaySeconds;
-
-		//Schedule the dequeue for each service station
-		service1.schedule(() -> dequeue(service1_line), delaySeconds, TimeUnit.SECONDS);	
-		service2.schedule(() -> dequeue(service2_line), delaySeconds, TimeUnit.SECONDS);	
-		service3.schedule(() -> dequeue(service3_line), delaySeconds, TimeUnit.SECONDS);	
-		service4.schedule(() -> dequeue(service4_line), delaySeconds, TimeUnit.SECONDS);	
-		service5.schedule(() -> dequeue(service5_line), delaySeconds, TimeUnit.SECONDS);	
-		
 		//Keep an array of passengers for timing
 		Passenger[] passengers = new Passenger[numPassengers];
 		context.setPassengers(passengers);
@@ -192,23 +200,23 @@ public class Simulation{
 			//Round robin dispatch strategy
 			switch(i % 5){
 				case 1:
-					passengerPool.schedule(() -> enqueue(service1_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(1, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 
 				case 2:
-					passengerPool.schedule(() -> enqueue(service2_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(2, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 				
 				case 3:
-					passengerPool.schedule(() -> enqueue(service3_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(3, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 				
 				case 4:
-					passengerPool.schedule(() -> enqueue(service4_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(4, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 			
 				case 0:
-					passengerPool.schedule(() -> enqueue(service5_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(5, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 			}
 		}
@@ -230,7 +238,7 @@ public class Simulation{
 				!passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(true, context);	
+		printRuntimeStatistics(context);	
 	}
 
 
@@ -257,6 +265,13 @@ public class Simulation{
 		BlockingQueue<Passenger> service4_line = new LinkedBlockingQueue<>(numPassengers);
 		BlockingQueue<Passenger> service5_line = new LinkedBlockingQueue<>(numPassengers);
 
+		context.addQueue(service1_line);
+		context.addQueue(service2_line);
+		context.addQueue(service3_line);
+		context.addQueue(service4_line);
+		context.addQueue(service5_line);
+
+
 		//5 service stations
 		ScheduledExecutorService service1 = Executors.newScheduledThreadPool(1);
 		ScheduledExecutorService service2 = Executors.newScheduledThreadPool(1);
@@ -280,11 +295,11 @@ public class Simulation{
 		final int processingTime = (delaySeconds == 0) ? averageServiceTime : delaySeconds;
 
 		//Schedule the dequeue for each service station
-		service1.schedule(() -> dequeue(service1_line), delaySeconds, TimeUnit.SECONDS);	
-		service2.schedule(() -> dequeue(service2_line), delaySeconds, TimeUnit.SECONDS);	
-		service3.schedule(() -> dequeue(service3_line), delaySeconds, TimeUnit.SECONDS);	
-		service4.schedule(() -> dequeue(service4_line), delaySeconds, TimeUnit.SECONDS);	
-		service5.schedule(() -> dequeue(service5_line), delaySeconds, TimeUnit.SECONDS);	
+		service1.schedule(() -> dequeue(0, context), delaySeconds, TimeUnit.SECONDS);	
+		service2.schedule(() -> dequeue(1, context), delaySeconds, TimeUnit.SECONDS);	
+		service3.schedule(() -> dequeue(2, context), delaySeconds, TimeUnit.SECONDS);	
+		service4.schedule(() -> dequeue(3, context), delaySeconds, TimeUnit.SECONDS);	
+		service5.schedule(() -> dequeue(4, context), delaySeconds, TimeUnit.SECONDS);	
 	
 		//Keep an array of passengers for timing
 		Passenger[] passengers = new Passenger[numPassengers];
@@ -300,23 +315,23 @@ public class Simulation{
 			//Round robin dispatch strategy
 			switch(random.nextInt() % 5){
 				case 1:
-					passengerPool.schedule(() -> enqueue(service1_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(1, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 
 				case 2:
-					passengerPool.schedule(() -> enqueue(service2_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(2, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 				
 				case 3:
-					passengerPool.schedule(() -> enqueue(service3_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(3, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 				
 				case 4:
-					passengerPool.schedule(() -> enqueue(service4_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(4, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 			
 				case 0:
-					passengerPool.schedule(() -> enqueue(service5_line, entrant, context), delaySeconds, TimeUnit.SECONDS);
+					passengerPool.schedule(() -> enqueue(5, entrant, context), delaySeconds, TimeUnit.SECONDS);
 					break;
 			}
 		}
@@ -339,25 +354,22 @@ public class Simulation{
 	
 
 		//Print runtime statistics to the console
-		printRuntimeStatistics(true, context);	
+		printRuntimeStatistics(context);	
 	}
 
 
 	/**
 	 * Helper method for enqueueing a passenger into a blocking queue
 	 */
-	private static void enqueue(BlockingQueue<Passenger> queue, Passenger p, SimulationContext context){
+	private static void enqueue(int queueID, Passenger p, SimulationContext context){
 		try{
-			queue.put(p);
+			context.getQueues().get(queueID).put(p);
 			//Set the waiting flag for calculation
 			p.startWaiting();
 
 			//Set the shortest queue length
-			context.setShortestQueueLength(queue.size());
-			//Maintain the shortest and longest length for the queue
-			if (queue.size() > context.getLongestQueueLength()){
-				context.setLongestQueueLength(queue.size());
-			}
+			context.setShortestQueueLength(queueID);
+			context.setLongestQueueLength(queueID);	
 
 		} catch(InterruptedException ie){
 			System.out.println(ie.getMessage());
@@ -369,10 +381,10 @@ public class Simulation{
 	/**
 	 * Helper method for dequeueing passenger into a blocking queue
 	 */
-	private static void dequeue(BlockingQueue<Passenger> queue){
+	private static void dequeue(int queueID, SimulationContext context){
 		try{
 			//Occupy the service station for a certain number of seconds
-			Passenger dequeued = queue.take();
+			Passenger dequeued = context.getQueues().get(queueID).take();
 			dequeued.stopWaiting();
 			System.out.println("Dequeueing");
 			//station.occupy(delaySeconds);
@@ -386,7 +398,7 @@ public class Simulation{
 	/**
 	 * A private helper method for printing the runtime statistics to the command line
 	 */
-	private static void printRuntimeStatistics(boolean is_multi, SimulationContext context){	
+	private static void printRuntimeStatistics(SimulationContext context){	
 		//Calculate the average waiting time
 		double waitingSum = 0;
 		double maximumWaitTime = 0;
@@ -402,12 +414,12 @@ public class Simulation{
 
 		//Display program statistics for user
 		System.out.println("\n\n=================== Program Statistics ======================");
-		System.out.println("Program Runtime: " + simulationDuration + " seconds");
+		System.out.println("Program Runtime: " + simulationDuration + " seconds\n");
 		for(int i = 0; i < context.getQueues().size(); i++){
 			System.out.println("Queue " + (i + 1) + " Statistics: ");
 			System.out.printf("\tAverage waiting time: %.2f seconds\n", (waitingSum / context.getPassengers().length));
 			System.out.printf("\tMaximum waiting time: %.2f seconds\n", maximumWaitTime);	
-			System.out.println("\tLongest length: " + context.getLongestQueueLength());
+			System.out.println("\tLongest length: " + context.getLongestQueueLength(i));
 		}
 
 		System.out.println("\nService Time Waiting Percentages");
@@ -417,11 +429,6 @@ public class Simulation{
 		}
 
 
-		if(is_multi){
-
-		} else {
-
-		}
 
 		System.out.println("\n\n=============================================================");	
 	}
