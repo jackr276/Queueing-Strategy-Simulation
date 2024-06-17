@@ -1,13 +1,15 @@
-import java.util.Scanner;
-
 /**
- * Author: Jack Robbins
+ * Author: Jack Robbins, jmr226
  * CS 610 Programming Assignment 1
  *
  * This class is the runner for the simulation, taking in all of the needed input
  */
 
+import java.util.Scanner;
 
+/**
+ * Serves only as an input grabber/runner class
+ */
 public class Main{
 
 	/**

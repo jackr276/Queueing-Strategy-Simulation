@@ -1,5 +1,5 @@
 /**
- * Author: Jack Robbins
+ * Author: Jack Robbins, jmr226
  * CS 610 Programming Assignment 1
  *
  * This class contains the simulation of queueing strategies
@@ -18,6 +18,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 
+/**
+ * This class contains four separate simulations, all of which must
+ * be called statically 
+ */
 public class Simulation{
 	/**
 	 * A simulation in which all passengers are taken from a single queue when ready
@@ -198,12 +202,9 @@ public class Simulation{
 		passengerPool.shutdown();
 	
 		//Blocking while loop for service station termination
-		while(  !service1.isTerminated() ||
-				!service2.isTerminated() || 
-				!service3.isTerminated() || 
-				!service4.isTerminated() ||
-				!service5.isTerminated() ||
-				!passengerPool.isTerminated());
+		while(!service1.isTerminated() || !service2.isTerminated() || 
+			  !service3.isTerminated() || !service4.isTerminated() ||
+			  !service5.isTerminated() || !passengerPool.isTerminated());
 
 		//Print runtime statistics to the console
 		printRuntimeStatistics(context);	
@@ -410,12 +411,9 @@ public class Simulation{
 		passengerPool.shutdown();
 	
 		//Blocking while loop for service station termination
-		while(  !service1.isTerminated() ||
-				!service2.isTerminated() || 
-				!service3.isTerminated() || 
-				!service4.isTerminated() ||
-				!service5.isTerminated() ||
-				!passengerPool.isTerminated());
+		while(!service1.isTerminated() || !service2.isTerminated() || 
+		      !service3.isTerminated() || !service4.isTerminated() ||
+			  !service5.isTerminated() || !passengerPool.isTerminated());
 	
 
 		//Print runtime statistics to the console
@@ -502,9 +500,11 @@ public class Simulation{
 		for(int i = 0; i < 5; i++){
 			double stationActivePercent = ((((double)passengersByQueue[i] * context.getAverageServiceTime())
 											+ context.getRandomFactor()) / simulationDuration) * 100;
+
 			System.out.printf("\tStation %d: active %.2f%% of the time\n", i + 1, stationActivePercent);
 		}
-
+		
+		//For prettiness
 		System.out.println("\n\n=============================================================");	
 	}
 

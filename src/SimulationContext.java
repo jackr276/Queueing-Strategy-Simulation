@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
+
+/**
+ * This is a "context" object that is meant to be passed around in the simulations
+ */
 public class SimulationContext{
 	private int shortestQueueLength;
 	private int averageServiceTime;
@@ -22,6 +26,9 @@ public class SimulationContext{
 	private int passengersServed;
 	private int randomFactor;
 
+	/**
+	 * Basic constructor, just initialize all arguments/data structures
+	 */
 	public SimulationContext(){
 		this.shortestQueueLength = 100;
 		this.shortestQueueID = 0;
@@ -31,22 +38,42 @@ public class SimulationContext{
 		this.randomFactor = 0;
 	}	
 
+	
+	/**
+	 * Set a simulation start time
+	 */
 	public void setStartTime(long startTime){
 		this.startTime = startTime;
 	}
 
+
+	/**
+	 * Add to the randomness factor that we put into all of our processing times
+	 */
 	public void addToRandomFactor(int randomAdjustment){
 		this.randomFactor += randomAdjustment;
 	}
 
+
+	/**
+	 * Set the average service time for convenience
+	 */
 	public void setAverageServiceTime(int averageServiceTime){
 		this.averageServiceTime = averageServiceTime;
 	}
 
+
+	/**
+	 * Set the internal array of passengers
+	 */
 	public void setPassengers(Passenger[] passengers){
 		this.passengers = passengers;
 	}
 
+
+	/**
+	 * Update the shortest queue length
+	 */
 	public void setShortestQueueLength(int queueID){
 		if(this.queues.get(queueID).size() < this.shortestQueueLength){
 			this.shortestQueueLength = this.queues.get(queueID).size();
@@ -54,38 +81,70 @@ public class SimulationContext{
 		}
 	}
 
+
+	/**
+	 * Set the number of passengers
+	 */
 	public void setNumPassengers(int numPassengers){
 		this.numPassengers = numPassengers; 
 	}
 
+
+	/**
+	 * Updates the longest queue length
+	 */
 	public void setLongestQueueLength(int queueID){
 		BlockingQueue<Passenger> queue = this.queues.get(queueID);
 		if(lengths.get(queue) < queue.size()){
 			lengths.put(queue, queue.size());
 		}
 	}
-	
+
+
+	/**
+	 * Add a blocking queue to the internal storage
+	 */
 	public void addQueue(BlockingQueue<Passenger> queue){
 		this.queues.add(queue);
 		this.lengths.put(queue, 0); 
 	}
 
+
+	/**
+	 * A simple helpper method to update the number of passengers served
+	 */
 	public void passengerServed(){
 		this.passengersServed++;
 	}
 
+
+	/**
+	 * A simple helper method to get the passengers array
+	 */
 	public Passenger[] getPassengers(){
 		return this.passengers;
 	}
 
+
+	/**
+	 * A simple helper method to get the start time
+	 */
 	public long getStartTime(){
 		return this.startTime;
 	}
 
+
+	/**
+	 * A simple helper method to get the average service time
+	 */
 	public int getAverageServiceTime(){
 		return this.averageServiceTime;
 	}
 
+	
+	/**
+	 * A simple helper method to get the number of passengers
+	 */
 	public int getNumPassengers(){
 		return this.numPassengers;
 	}
@@ -98,6 +157,9 @@ public class SimulationContext{
 		return this.passengersServed;
 	}
 
+	/**
+	 * A simple helper method to get the randomness factor
+	 */
 	public int getRandomFactor(){
 		return this.randomFactor;
 	}
