@@ -1,19 +1,12 @@
 /**
- * Author: Jack Robbins, jmr226
- * CS 610, Programming Assignment 1
- *
+ * Author: Jack Robbins
  * This class is the context object that is used for passing parameters between methods in Simulation.java
  */
-
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-
-/**
- * This is a "context" object that is meant to be passed around in the simulations
- */
 public class SimulationContext{
 	private int shortestQueueLength;
 	private int averageServiceTime;
@@ -25,6 +18,7 @@ public class SimulationContext{
 	private Passenger[] passengers;
 	private int passengersServed;
 	private int randomFactor;
+
 
 	/**
 	 * Basic constructor, just initialize all arguments/data structures

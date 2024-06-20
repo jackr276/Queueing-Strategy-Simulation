@@ -1,11 +1,9 @@
 /**
- * Author: Jack Robbins, jmr226
- * CS 610 Programming Assignment 1
+ * Author: Jack Robbins
+ * Passenger(Queue Occupant) object
  *
  * This class file contains the implementation of the Passenger object, who will occupy the queue
  */
-
-
 public class Passenger{
 	//Keep track of waiting time for each passenger	
 	private long waitingStartTime;

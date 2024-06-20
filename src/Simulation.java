@@ -1,8 +1,7 @@
 /**
  * Author: Jack Robbins, jmr226
- * CS 610 Programming Assignment 1
  *
- * This class contains the simulation of queueing strategies
+ * This class contains the simulation of queueing strategies(Strategy Pattern)
  * Strategies included are 
  * 	- Single queue with 5 service stations
  * 	- Multiple queues with a round robin dispatch
@@ -515,6 +514,7 @@ public class Simulation{
 	private static double getAverageWaitTime(SimulationContext context, int queueID){
 		double waitingSum = 0;
 		int passengersInQueue = 0;
+		
 		for(Passenger passenger : context.getPassengers()){
 			if(passenger.getQueueID() == queueID){
 				if(passenger.getWaitingTime() < 0){
@@ -525,6 +525,8 @@ public class Simulation{
 				passengersInQueue++;
 			}
 		}
+
+		//Take the average
 		return waitingSum / passengersInQueue;
 	}
 
@@ -534,11 +536,13 @@ public class Simulation{
 	 */
 	private static double getMaxWaitTime(SimulationContext context, int queueID){
 		double maximumWaitTime = 0;
+
 		for(Passenger passenger : context.getPassengers()){
 			if(passenger.getQueueID() == queueID && passenger.getWaitingTime() > maximumWaitTime){
 				maximumWaitTime = passenger.getWaitingTime();
 			}
 		}
+
 		return maximumWaitTime;
 	}
 }

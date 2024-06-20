@@ -1,15 +1,12 @@
 /**
- * Author: Jack Robbins, jmr226
- * CS 610 Programming Assignment 1
+ * Author: Jack Robbins 
+ * Queueing Simulation Entry Point
  *
  * This class is the runner for the simulation, taking in all of the needed input
  */
 
 import java.util.Scanner;
 
-/**
- * Serves only as an input grabber/runner class
- */
 public class Main{
 
 	/**
@@ -45,7 +42,9 @@ public class Main{
 
 		//Done scanning
 		in.close();
-		
+	
+		System.out.println("\n=============== Displaying Realtime Evolution ==============\n");
+
 		//Switch on user input, call appropriate simulation
 		switch(option){
 			case 1:
@@ -64,5 +63,5 @@ public class Main{
 				System.out.println("Invalid entry, program will now terminate");
 				return;
 		}
-	}	
+	}
 }
