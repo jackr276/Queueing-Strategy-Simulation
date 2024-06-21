@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 public class SimulationContext{
+	/* Context object keeps track of these objects */
 	private int shortestQueueLength;
 	private int averageServiceTime;
 	private int shortestQueueID;

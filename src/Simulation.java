@@ -7,6 +7,8 @@
  * 	- Multiple queues with a round robin dispatch
  * 	- Multiple queues with a shortest queue dispatch
  * 	- Multiple queues with a random queue dispatch
+ *
+ * 	Using ScheduledExecutorService for simulation of enqueueing and dequeueing
  */
 
 import java.util.Random;
