@@ -4,6 +4,10 @@
  *
  * This class file contains the implementation of the Passenger object, who will occupy the queue
  */
+
+package queueOccupant;
+
+
 public class Passenger{
 	//Keep track of waiting time for each passenger	
 	private long waitingStartTime;

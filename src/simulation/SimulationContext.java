@@ -3,6 +3,9 @@
  * This class is the context object that is used for passing parameters between methods in Simulation.java
  */
 
+package simulation;
+
+import queueOccupant.Passenger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;

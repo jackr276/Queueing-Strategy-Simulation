@@ -6,6 +6,8 @@
  */
 
 import java.util.Scanner;
+import simulation.Simulation;
+
 
 public class Main{
 

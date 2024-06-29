@@ -11,6 +11,9 @@
  * 	Using ScheduledExecutorService for simulation of enqueueing and dequeueing
  */
 
+package simulation;
+
+import queueOccupant.Passenger;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
