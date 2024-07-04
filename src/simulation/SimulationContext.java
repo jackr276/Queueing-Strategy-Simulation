@@ -10,6 +10,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * We pass around the context object as a nice package that allows us to keep
+ * track of everything at once. Instead of passing around enormous parameter
+ * lists, we just pass one of these objects and access/modify these fields
+ * as needed
+ */
 public class SimulationContext{
 	/* Context object keeps track of these objects */
 	private int shortestQueueLength;

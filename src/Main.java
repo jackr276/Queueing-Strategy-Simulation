@@ -10,7 +10,6 @@ import simulation.Simulation;
 
 
 public class Main{
-
 	/**
 	 * Runs everything according to user input
 	 * @param args is not used
