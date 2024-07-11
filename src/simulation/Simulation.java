@@ -1,5 +1,5 @@
 /**
- * Author: Jack Robbins, jmr226
+ * Author: Jack Robbins
  *
  * This class contains the simulation of queueing strategies(Strategy Pattern)
  * Strategies included are 
